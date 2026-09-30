@@ -880,7 +880,7 @@
 </body>
 <script>
     // === STATE ===
-    let COIN_LIST = ['1INCH', 'A', 'A2Z', 'AB', 'ACH', 'ACT', 'AEVO', 'AGI', 'AI', 'ALGO', 'ALT', 'ANIME', 'APE', 'APT', 'ARPA', 'AWE', 'AXS', 'BABYDOGE', 'BAN', 'BEL', 'BLUR', 'BOME', 'BONK', 'C98', 'CAKE', 'CAT', 'CELR', 'CFX', 'CHR', 'CHZ', 'CKB', 'COS', 'COTI', 'CRO', 'CSPR', 'CTSI', 'CVC', 'DEGO', 'DENT', 'DGB', 'DODO', 'DOGE', 'DOGS', 'DOT', 'DUSK', 'EDU', 'ENA', 'ENJ', 'ENS', 'FET', 'FLM', 'FLOKI', 'FLR', 'FORM', 'FTT', 'FUN', 'GALA', 'GEAR', 'GMT', 'GOAT', 'GRT', 'GT', 'HBAR', 'HFT', 'HIGH', 'HIVE', 'HMSTR', 'HOOK', 'HTX', 'ICP', 'ID', 'IMX', 'IO', 'IOST', 'IOTA', 'IQ', 'JASMY', 'JOE', 'KAVA', 'KDA', 'KNC', 'LAT', 'LINK', 'LRC', 'LTC', 'LUNC', 'MANA', 'MANTA', 'MAV', 'MBOX', 'MEME', 'MOG', 'NEAR', 'NEIRO', 'NFT', 'NKN', 'NOT', 'OM', 'ONE', 'OXT', 'PENGU', 'PEOPLE', 'PEPE', 'PHA', 'PI', 'PIXEL', 'PNUT', 'POL', 'POND', 'PORTAL', 'PSG', 'PYTH', 'QKC', 'RAD', 'RARE', 'RATS', 'RDNT', 'RSR', 'RUNE', 'SAND', 'SATS', 'SEI', 'SFP', 'SHIB', 'SKL', 'SOL', 'SPELL', 'STRK', 'STX', 'SUI', 'SUSHI', 'SYS', 'TFUEL', 'THETA', 'TKO', 'TLM', 'TRUMP', 'TRX', 'TURBO', 'UNI', 'VOXEL', 'VTHO', 'W', 'WAXP', 'WEN', 'WIN','WLD', 'WOO', 'XAI', 'XEC', 'XVG', 'XVS', 'YGG',  'ZBCN', 'ZIL'];
+    let COIN_LIST = ['1INCH', 'A', 'A2Z', 'AB', 'ACH', 'ACT', 'AEVO', 'AGI', 'AI', 'ALGO', 'ALT', 'ANIME', 'APE', 'APT', 'ARPA', 'ATA', 'AWE', 'AXS', 'BABYDOGE', 'BAN', 'BEL', 'BLUR', 'BOME', 'BONK', 'C98', 'CAKE', 'CAT', 'CELR', 'CFX', 'CHR', 'CHZ', 'CKB', 'COS', 'COTI', 'CRO', 'CSPR', 'CTSI', 'CVC', 'DEGO', 'DENT', 'DGB', 'DODO', 'DOGE', 'DOGS', 'DOT', 'DUSK', 'EDU', 'ENA', 'ENJ', 'ENS', 'ETH', 'FET', 'FLM', 'FLOKI', 'FLR', 'FORM', 'FTT', 'FUN', 'GALA', 'GMT', 'GOAT', 'GRT', 'GT', 'HBAR', 'HFT', 'HIGH', 'HIVE', 'HMSTR', 'HOOK', 'HTX', 'ICP', 'ID', 'IDEX', 'IMX', 'IO', 'IOST', 'IOTA', 'IQ', 'JASMY', 'JOE', 'KAVA', 'KDA', 'KNC', 'LAT', 'LINK', 'LRC', 'LTC', 'LUNC', 'MANA', 'MANTA', 'MAV', 'MBOX', 'MEME', 'MOG', 'NEAR', 'NEIRO', 'NFT', 'NKN', 'NOT', 'OM', 'ONE', 'OXT', 'PENGU', 'PEOPLE', 'PEPE', 'PHA', 'PI', 'PIXEL', 'PNUT', 'POL', 'POND', 'PORTAL', 'PSG', 'PYTH', 'QKC', 'RAD', 'RARE', 'RATS', 'RDNT', 'RSR', 'RUNE', 'SAND', 'SATS', 'SEI', 'SFP', 'SHIB', 'SKL', 'SOL', 'SPELL', 'STRK', 'STX', 'SUI', 'SUSHI', 'SYS', 'TFUEL', 'THETA', 'TKO', 'TLM', 'TRUMP', 'TRX', 'TURBO', 'UNI', 'VOXEL', 'VTHO', 'W', 'WAXP', 'WEN', 'WIN','WLD', 'WOO', 'XAI', 'XEC', 'XVG', 'XRP', 'XVS', 'YGG',  'ZBCN', 'ZIL'];
     let marketData = {};
     let currentSort = 'updateTime';
     let sortDirection = 'desc';
@@ -888,6 +888,8 @@
     let editingCoin = null;
     let selectedCoin = null;
     let userSettings = JSON.parse(localStorage.getItem('coinSettingsV3')) || {};
+    const REMOVED_COINS = ['GEAR'];   // 已刪除的幣種（本機與雲端都不再載入）
+    REMOVED_COINS.forEach(c => { delete userSettings[c]; delete userSettings[c.toLowerCase()]; });
 
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     let longPressTimer;
@@ -914,7 +916,7 @@
         { key: 'entryDist', label: '現價與進場價距離', defaultDir: 'asc' }
     ];
 
-    Object.keys(userSettings).forEach(k => { if (k !== '__GLOBAL__' && k !== '__NOTIF_LOG__' && !COIN_LIST.includes(k.toUpperCase())) { COIN_LIST.push(k.toUpperCase()); } });
+    Object.keys(userSettings).forEach(k => { if (k !== '__GLOBAL__' && k !== '__NOTIF_LOG__' && !REMOVED_COINS.includes(k.toUpperCase()) && !COIN_LIST.includes(k.toUpperCase())) { COIN_LIST.push(k.toUpperCase()); } });
     COIN_LIST.forEach(coin => {
         if (!userSettings[coin]) userSettings[coin] = { entry: 0, target: 0, stopLoss: 0, isHolding: false, lastManualUpdate: 0, note: '', entrySide: null, capital: 0, leverage: 1, manualStatus: null };
         else {
@@ -955,7 +957,7 @@
             if (d.record) { 
                 const c = d.record; 
                 Object.keys(c).forEach(k => { 
-                    if (k !== '__GLOBAL__' && k !== '__NOTIF_LOG__' && !COIN_LIST.includes(k.toUpperCase())) { 
+                    if (k !== '__GLOBAL__' && k !== '__NOTIF_LOG__' && !REMOVED_COINS.includes(k.toUpperCase()) && !COIN_LIST.includes(k.toUpperCase())) { 
                         COIN_LIST.push(k.toUpperCase()); 
                         userSettings[k.toUpperCase()] = { entry: 0, target: 0, stopLoss: 0, isHolding: false, lastManualUpdate: 0, note: '', entrySide: null, capital: 0, leverage: 1, manualStatus: null }; 
                     } 
@@ -1122,29 +1124,29 @@
         '1INCH': '1inch', 'A': 'vaulta', 'A2Z': 'arena-z', 'AB': 'ab',
         'ACH': 'alchemy-pay', 'ACT': 'act-i-the-ai-prophecy', 'AEVO': 'aevo', 'AGI': 'delysium',
         'AI': 'sleepless-ai', 'ALGO': 'algorand', 'ALT': 'altlayer', 'ANIME': 'anime',
-        'APE': 'apecoin', 'APT': 'aptos', 'ARPA': 'arpa', 'AWE': 'awe-network',
+        'APE': 'apecoin', 'APT': 'aptos', 'ARPA': 'arpa', 'AWE': 'awe', 'ATA': 'ata',
         'AXS': 'axie-infinity', 'BABYDOGE': 'baby-doge-coin', 'BAN': 'comedian', 'BEL': 'bella-protocol',
         'BLUR': 'blur', 'BOME': 'book-of-meme', 'BONK': 'bonk', 'C98': 'coin98',
-        'CAKE': 'pancakeswap-token', 'CAT': 'simons-cat', 'CELR': 'celer-network', 'CFX': 'conflux-token',
+        'CAKE': 'pancakeswap-token', 'CAT': 'simon-s-cat', 'CELR': 'celer-network', 'CFX': 'conflux-token',
         'CHR': 'chromaway', 'CHZ': 'chiliz', 'CKB': 'nervos-network', 'COS': 'contentos',
         'COTI': 'coti', 'CRO': 'crypto-com-chain', 'CSPR': 'casper-network', 'CTSI': 'cartesi',
         'CVC': 'civic', 'DEGO': 'dego-finance', 'DENT': 'dent', 'DGB': 'digibyte',
         'DODO': 'dodo', 'DOGE': 'dogecoin', 'DOGS': 'dogs-2', 'DOT': 'polkadot',
         'DUSK': 'dusk-network', 'EDU': 'edu-coin', 'ENA': 'ethena', 'ENJ': 'enjincoin',
-        'ENS': 'ethereum-name-service', 'FET': 'artificial-superintelligence-alliance', 'FLM': 'flamingo-finance', 'FLOKI': 'floki',
+        'ENS': 'ethereum-name-service', 'FET': 'fetch-ai', 'FLM': 'flamingo-finance', 'FLOKI': 'floki',
         'FLR': 'flare-networks', 'FORM': 'four', 'FTT': 'ftx-token', 'FUN': 'funfair',
-        'GALA': 'gala', 'GEAR': 'gearbox-protocol', 'GMT': 'stepn', 'GOAT': 'goatseus-maximus',
+        'GALA': 'gala', 'GMT': 'stepn', 'GOAT': 'goatseus-maximus',
         'GRT': 'the-graph', 'GT': 'gatechain-token', 'HBAR': 'hedera-hashgraph', 'HFT': 'hashflow',
         'HIGH': 'highstreet', 'HIVE': 'hive', 'HMSTR': 'hamster-kombat', 'HOOK': 'hooked-protocol',
-        'HTX': 'htx-dao', 'ICP': 'internet-computer', 'ID': 'space-id', 'IMX': 'immutable-x',
-        'IO': 'io-net', 'IOST': 'iostoken', 'IOTA': 'iota', 'IQ': 'everipedia',
+        'HTX': 'htx-dao', 'ICP': 'internet-computer', 'ID': 'space-id', 'IDEX': 'idex', 'IMX': 'immutable-x',
+        'IO': 'io', 'IOST': 'iostoken', 'IOTA': 'iota', 'IQ': 'everipedia',
         'JASMY': 'jasmycoin', 'JOE': 'joe', 'KAVA': 'kava', 'KDA': 'kadena',
         'KNC': 'kyber-network-crystal', 'LAT': 'platon-network', 'LINK': 'chainlink', 'LRC': 'loopring',
         'LTC': 'litecoin', 'LUNC': 'terra-luna', 'MANA': 'decentraland', 'MANTA': 'manta-network',
         'MAV': 'maverick-protocol', 'MBOX': 'mobox', 'MEME': 'memecoin-2', 'MOG': 'mog-coin',
-        'NEAR': 'near', 'NEIRO': 'first-neiro-on-ethereum', 'NFT': 'apenft', 'NKN': 'nkn',
+        'NEAR': 'near', 'NEIRO': 'neiro-3', 'NFT': 'apenft', 'NKN': 'nkn',
         'NOT': 'notcoin', 'OM': 'mantra-dao', 'ONE': 'harmony', 'OXT': 'orchid-protocol',
-        'PENGU': 'pudgy-penguins', 'PEOPLE': 'constitutiondao', 'PEPE': 'pepe', 'PHA': 'phala-network',
+        'PENGU': 'pudgy-penguins', 'PEOPLE': 'constitutiondao', 'PEPE': 'pepe', 'PHA': 'pha',
         'PI': 'pi-network', 'PIXEL': 'pixels', 'PNUT': 'peanut-the-squirrel', 'POL': 'polygon-ecosystem-token',
         'POND': 'marlin', 'PORTAL': 'portal', 'PSG': 'paris-saint-germain-fan-token', 'PYTH': 'pyth-network',
         'QKC': 'quark-chain', 'RAD': 'radicle', 'RARE': 'superrare', 'RATS': 'rats',
@@ -1159,6 +1161,49 @@
         'XAI': 'xai-blockchain', 'XEC': 'ecash', 'XVG': 'verge', 'XVS': 'venus',
         'YGG': 'yield-guild-games', 'ZBCN': 'zebec-network', 'ZIL': 'zilliqa',
     };
+
+
+    // ===================== Binance 報價設定 =====================
+    // 來源：https://api.binance.com/api/v3/ticker/price（只有現價，沒有 24h 漲跌與成交量）
+    const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
+    // 只有 /BTC 交易對的幣：用「幣/BTC × BTC/USDT」換算成美元
+    const BINANCE_BTC_PAIRS = { 'DOGE': 'DOGEBTC', 'XRP': 'XRPBTC', 'ETH': 'ETHBTC' };
+    // 一律使用幣安 /USDT 報價（不走 CoinGecko）
+    const BINANCE_ONLY = ['AI'];
+    // CoinGecko 查不到報價時，改用幣安 /USDT 備援
+    const BINANCE_FALLBACK = ['FET', 'PHA', 'IO', 'NEIRO', 'AWE', 'CAT', 'IDEX', 'ATA'];
+
+    // 取得指定幣種的幣安美元報價，回傳 { 幣種代號: {price, change, vol, src} }；失敗時丟出錯誤
+    async function fetchBinancePrices(symbols) {
+        const pairOf = {};   // 幣安交易對 → 幣種代號
+        const needBtc = symbols.some(s => BINANCE_BTC_PAIRS[s]);
+        symbols.forEach(s => { pairOf[BINANCE_BTC_PAIRS[s] || (s + 'USDT')] = s; });
+        const wanted = Object.keys(pairOf);
+        if (needBtc) wanted.push('BTCUSDT');
+        let res;
+        try {
+            res = await fetchWithTimeout(`${BINANCE_PRICE_URL}?symbols=${encodeURIComponent(JSON.stringify(wanted))}`, 15000);
+        } catch (e) { throw new Error('Binance ' + (e.name === 'AbortError' ? '請求逾時' : '網路錯誤')); }
+        // 其中一個交易對不存在時幣安會整批回 400；改為抓全部再自行篩選
+        if (!res.ok) {
+            try { res = await fetchWithTimeout(BINANCE_PRICE_URL, 20000); } catch (e) { throw new Error('Binance 網路錯誤'); }
+            if (!res.ok) throw new Error('Binance HTTP ' + res.status);
+        }
+        const list = await res.json();
+        if (!Array.isArray(list)) throw new Error('Binance 回傳格式異常');
+        const px = {};
+        list.forEach(t => { px[t.symbol] = Number(t.price); });
+        const btcUsd = px['BTCUSDT'];
+        const out = {};
+        Object.keys(pairOf).forEach(pair => {
+            const sym = pairOf[pair];
+            let usd = px[pair];
+            if (BINANCE_BTC_PAIRS[sym]) usd = (usd > 0 && btcUsd > 0) ? usd * btcUsd : NaN;
+            if (!(usd > 0)) { console.warn('[Binance 無資料]', sym, '→', pair); return; }
+            out[sym] = { price: usd, change: 0, vol: 0, src: 'Binance' };
+        });
+        return out;
+    }
 
     // 送出單一批次（/simple/price + ids），回傳 { 幣種代號: {price, change, vol, src} }；失敗時丟出錯誤
     async function fetchCoinGeckoBatch(symbols) {
@@ -1219,8 +1264,9 @@
         isFetchingMarket = true;
 
         try {
-            const mappedCoins = COIN_LIST.filter(c => COIN_ID_MAP[c]);
-            const unmapped = COIN_LIST.filter(c => !COIN_ID_MAP[c]);
+            const binanceDirect = COIN_LIST.filter(c => BINANCE_ONLY.includes(c) || BINANCE_BTC_PAIRS[c]);
+            const mappedCoins = COIN_LIST.filter(c => COIN_ID_MAP[c] && !binanceDirect.includes(c));
+            const unmapped = COIN_LIST.filter(c => !COIN_ID_MAP[c] && !binanceDirect.includes(c));
             if (unmapped.length) console.warn('[缺少 CoinGecko ID 對照]', unmapped.join(', '));
             const batches = splitIntoBatches(mappedCoins);
             // 各批次錯開 1 秒送出，避免瞬間連發
@@ -1228,10 +1274,22 @@
                 new Promise(r => setTimeout(r, i * 1000)).then(() => fetchCoinGeckoBatch(b))
             ));
 
+            // 幣安：專用幣（DOGE/XRP/ETH/AI）＋ CoinGecko 沒報價的備援幣
+            const cgMerged = {};
+            results.forEach(r => { if (r.status === 'fulfilled') Object.assign(cgMerged, r.value); });
+            const binanceList = binanceDirect.concat(BINANCE_FALLBACK.filter(c => COIN_LIST.includes(c) && !cgMerged[c]));
+            let binanceOk = false;
+            if (binanceList.length) {
+                try { Object.assign(cgMerged, await fetchBinancePrices(binanceList)); binanceOk = true; }
+                catch (e) { console.warn('[Binance 失敗]', e.message); if (statusEl) statusEl.title = e.message; }
+            }
+
             const merged = {};
             let okCount = 0, rateLimited = false, authError = false, firstErr = '';
+            Object.assign(merged, cgMerged);
+            if (binanceOk) okCount++;
             results.forEach(r => {
-                if (r.status === 'fulfilled') { okCount++; Object.assign(merged, r.value); }
+                if (r.status === 'fulfilled') { okCount++; }
                 else {
                     const msg = (r.reason && r.reason.message) || String(r.reason);
                     console.warn('[CoinGecko 批次失敗]', msg);
@@ -1248,6 +1306,7 @@
             } else {
                 const failedBatchCoins = new Set();
                 results.forEach((r, i) => { if (r.status !== 'fulfilled') batches[i].forEach(c => failedBatchCoins.add(c)); });
+                if (!binanceOk) binanceList.forEach(c => failedBatchCoins.add(c));
                 COIN_LIST.forEach(coin => {
                     if (merged[coin]) marketData[coin] = merged[coin];
                     else if (failedBatchCoins.has(coin) && marketData[coin]) { /* 該批次失敗：保留舊價 */ }
