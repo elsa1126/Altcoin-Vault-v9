@@ -1144,6 +1144,14 @@
     // 👇 備用金鑰（選填）：主金鑰額度用完、金鑰錯誤或連線失敗時自動改用；留空 = 不啟用
     const COINGECKO_API_KEY_BACKUP = 'CG-zK4XX21TMk4g8oTWC6Pg3gmC';
     const COINGECKO_PLAN_BACKUP = 'demo';
+    // 👇 第三把金鑰（選填）：前兩把都不能用時才會用到；從第 3 把起，一旦用到就會跳出警示提醒你 c0983188451
+    const COINGECKO_API_KEY_BACKUP2 = 'CG-tc5od7LRXTuANHu9BCBYngh6';
+    const COINGECKO_PLAN_BACKUP2 = 'demo';
+    // 👇 第四、第五把金鑰（選填）b0983,jun
+    const COINGECKO_API_KEY_BACKUP3 = 'CG-n74MvN36GYNJ7ffTUDLuhBHU';
+    const COINGECKO_PLAN_BACKUP3 = 'demo';
+    const COINGECKO_API_KEY_BACKUP4 = 'CG-RFZxFEq4v12LW7pvvJ4XVD91';
+    const COINGECKO_PLAN_BACKUP4 = 'demo';
     // =============================================================
 
     const COINGECKO_BASE = COINGECKO_PLAN === 'pro' ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
@@ -1153,8 +1161,9 @@
     let lastFetchAt = 0;
     let isFetchingMarket = false;
     let missingKeyToastShown = false;
-    let cgBackupUntil = 0;      // 主金鑰失敗後，這個時間點前優先用備用金鑰（10 分鐘）
-    let cgUsingBackup = false;
+    const cgDeadUntil = {};     // 金鑰失敗後 10 分鐘內先跳過（排到最後備用）
+    let cgActiveN = 1;          // 目前成功使用的是第幾把金鑰
+    let cgWarnedN = 0;          // 已經提醒過的金鑰編號（第 3 把起）
     let binanceToastShown = false;
 
     async function fetchWithTimeout(url, timeoutMs = 15000) {
@@ -1254,11 +1263,15 @@
 
     // 主／備用金鑰：依序嘗試，前一把失敗（額度、金鑰錯誤、被擋）就換下一把
     function cgKeyList() {
-        const list = [
-            { key: COINGECKO_API_KEY, plan: COINGECKO_PLAN, name: '主' },
-            { key: COINGECKO_API_KEY_BACKUP, plan: COINGECKO_PLAN_BACKUP, name: '備用' }
+        const all = [
+            { n: 1, key: COINGECKO_API_KEY, plan: COINGECKO_PLAN, name: '主' },
+            { n: 2, key: COINGECKO_API_KEY_BACKUP, plan: COINGECKO_PLAN_BACKUP, name: '備用1' },
+            { n: 3, key: COINGECKO_API_KEY_BACKUP2, plan: COINGECKO_PLAN_BACKUP2, name: '備用2' },
+            { n: 4, key: COINGECKO_API_KEY_BACKUP3, plan: COINGECKO_PLAN_BACKUP3, name: '備用3' },
+            { n: 5, key: COINGECKO_API_KEY_BACKUP4, plan: COINGECKO_PLAN_BACKUP4, name: '備用4' }
         ].filter(k => k.key);
-        return Date.now() < cgBackupUntil ? list.reverse() : list;
+        const now = Date.now(), dead = k => cgDeadUntil[k.n] > now;
+        return all.filter(k => !dead(k)).concat(all.filter(dead));   // 沒失敗過的照順序在前
     }
 
     async function cgRequest(idsStr) {
@@ -1279,16 +1292,23 @@
                 const data = await res.json();
                 if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('回傳格式異常：' + JSON.stringify(data).slice(0, 200));
                 if (data.status && data.status.error_message) throw new Error(data.status.error_message);
-                cgUsingBackup = k.name === '備用';
+                delete cgDeadUntil[k.n];
+                cgActiveN = k.n;
+                if (k.n >= 3) {
+                    if (cgWarnedN !== k.n) {
+                        cgWarnedN = k.n;
+                        showToast(`⚠️ 已用到第 ${k.n} 把 CoinGecko 金鑰，請注意額度！`, 'error');
+                        addNotifLog('⚠️', 'CoinGecko 金鑰警示', `前面的金鑰目前無法使用（額度用完或連線失敗），已切換到第 ${k.n} 把金鑰，請注意用量。`, 'stoploss');
+                    }
+                } else cgWarnedN = 0;
                 return data;
             } catch (e) {
                 lastErr = e;
                 console.warn(`[CoinGecko ${k.name}金鑰失敗]`, e.message);
-                if (k.name === '主' && COINGECKO_API_KEY_BACKUP) cgBackupUntil = Date.now() + 600000;
-                else if (k.name === '備用') cgBackupUntil = 0;
+                if (keys.length > 1) cgDeadUntil[k.n] = Date.now() + 600000;
             }
         }
-        if (keys.length > 1) lastErr.message = '主／備用金鑰皆失敗：' + lastErr.message;
+        if (keys.length > 1) lastErr.message = '所有金鑰皆失敗：' + lastErr.message;
         throw lastErr;
     }
 
@@ -1315,7 +1335,7 @@
         const statusEl = document.getElementById('status-indicator');
         const setStatus = (txt, color) => { if (statusEl) statusEl.innerHTML = `<span style="font-size:10px;color:var(--${color});font-family:var(--font-mono)">${txt}</span>`; };
 
-        if (!COINGECKO_API_KEY && !COINGECKO_API_KEY_BACKUP) {
+        if (!cgKeyList().length) {
             console.warn('尚未填入 CoinGecko API 金鑰（index.html 內的 COINGECKO_API_KEY）');
             setStatus('NO KEY', 'amber');
             if (!missingKeyToastShown) { missingKeyToastShown = true; showToast('請先在 index.html 填入 CoinGecko 金鑰', 'error'); }
@@ -1377,8 +1397,9 @@
                     else marketData[coin] = { price: 0, change: 0, vol: 0, src: '--' };
                 });
                 lastFetchAt = Date.now();
-                if (statusEl) statusEl.title = cgUsingBackup ? '目前使用備用金鑰' : '';
+                if (statusEl) statusEl.title = cgActiveN > 1 ? `目前使用第 ${cgActiveN} 把金鑰` : '';
                 if (statusEl) statusEl.innerHTML = `<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>`;
+                if (cgActiveN >= 3) setStatus('KEY ' + cgActiveN, 'amber');   // 用到第 3 把起，狀態燈改成琥珀色文字
             }
             if (!editingCoin) renderCards();
         } catch (e) {
