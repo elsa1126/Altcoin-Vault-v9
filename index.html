@@ -591,6 +591,13 @@
         #side-panel button:not([onclick="toggleSidePanel()"]){background:rgba(255,255,255,.05)!important;color:var(--text-primary)!important;border:1px solid var(--border-default)!important;border-radius:10px!important}
         #side-panel button:not([onclick="toggleSidePanel()"]):hover{background:rgba(255,255,255,.1)!important}
         #gd{border-radius:20px}
+        .gd-ico{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.28);color:var(--accent)}
+        .gd-ico svg{width:15px;height:15px}
+        @media (min-width:768px){.gd-ico{width:32px;height:32px;border-radius:10px}.gd-ico svg{width:18px;height:18px}}
+        .note-chip{font-size:11px;line-height:1;padding:5px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--text-secondary);cursor:pointer;-webkit-tap-highlight-color:transparent}
+        .note-chip.on{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.55);color:#ddd6fe}
+        .note-chip.add{border-style:dashed;color:var(--text-muted)}
+        .note-pill{font-size:10px;line-height:1;padding:3px 8px;border-radius:999px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.1);color:#fbbf24;cursor:pointer;font-weight:600}
     </style>
 </head>
 
@@ -599,7 +606,7 @@
     <!-- Global Dashboard -->
     <div id="gd">
         <div id="gd-header-wrap" onclick="toggleGD()">
-            <div id="gd-header-icon">📊</div>
+            <div id="gd-header-icon"><span class="gd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span></div>
             <div id="gd-header-content">
                 <div style="display:flex;align-items:center;gap:7px">
                     <span style="font-size:11px;font-weight:600;color:var(--text-secondary)">資金看板</span>
@@ -805,7 +812,7 @@
             
             <div class="hidden lg:flex flex-1 max-w-xl mx-8 items-center gap-4">
                 <div class="flex-1 relative">
-                    <input type="text" id="desktopSearchInput" placeholder="搜尋幣種..." class="w-full bg-[#161412] border border-white/[0.08] text-white text-sm rounded-lg py-2 px-4 focus:outline-none focus:border-[#A78BFA] transition">
+                    <input type="text" id="desktopSearchInput" placeholder="搜尋幣種或備註..." class="w-full bg-[#161412] border border-white/[0.08] text-white text-sm rounded-lg py-2 px-4 focus:outline-none focus:border-[#A78BFA] transition">
                 </div>
                 <div class="flex items-center gap-2 bg-[#161412] p-1 rounded-lg border border-white/[0.08]">
                     <button class="pill-filter text-xs px-4 py-1.5 rounded-md hover:bg-white/[0.04] !font-medium" onclick="cycleFilter()" id="desktop-filter-label">全部</button>
@@ -867,7 +874,7 @@
         </button>
         <button class="pill-filter" onclick="cycleFilter()" id="pill-filter-label">全部</button>
         <div id="pill-search">
-            <input type="text" id="searchInput" placeholder="搜尋幣種...">
+            <input type="text" id="searchInput" placeholder="搜尋幣種或備註...">
             <button onclick="toggleSearch()" class="text-[#8A8176] hover:text-white text-sm transition">&times;</button>
         </div>
         <button class="pill-btn" onclick="toggleSearch()" id="pill-search-btn">
@@ -880,7 +887,7 @@
 </body>
 <script>
     // === STATE ===
-    let COIN_LIST = ['1INCH', 'A', 'A2Z', 'AB', 'ACH', 'ACT', 'AEVO', 'AGI', 'AI', 'ALGO', 'ALT', 'ANIME', 'APE', 'APT', 'ARPA', 'ATA', 'AWE', 'AXS', 'BABYDOGE', 'BAN', 'BEL', 'BLUR', 'BOME', 'BONK', 'C98', 'CAKE', 'CAT', 'CELR', 'CFX', 'CHR', 'CHZ', 'CKB', 'COS', 'COTI', 'CRO', 'CSPR', 'CTSI', 'CVC', 'DEGO', 'DENT', 'DGB', 'DODO', 'DOGE', 'DOGS', 'DOT', 'DUSK', 'EDU', 'ENA', 'ENJ', 'ENS', 'ETH', 'FET', 'FLM', 'FLOKI', 'FLR', 'FORM', 'FTT', 'FUN', 'GALA', 'GMT', 'GOAT', 'GRT', 'GT', 'HBAR', 'HFT', 'HIGH', 'HIVE', 'HMSTR', 'HOOK', 'HTX', 'ICP', 'ID', 'IDEX', 'IMX', 'IO', 'IOST', 'IOTA', 'IQ', 'JASMY', 'JOE', 'KAVA', 'KDA', 'KNC', 'LAT', 'LINK', 'LRC', 'LTC', 'LUNC', 'MANA', 'MANTA', 'MAV', 'MBOX', 'MEME', 'MOG', 'NEAR', 'NEIRO', 'NFT', 'NKN', 'NOT', 'OM', 'ONE', 'OXT', 'PENGU', 'PEOPLE', 'PEPE', 'PHA', 'PI', 'PIXEL', 'PNUT', 'POL', 'POND', 'PORTAL', 'PSG', 'PYTH', 'QKC', 'RAD', 'RARE', 'RATS', 'RDNT', 'RSR', 'RUNE', 'SAND', 'SATS', 'SEI', 'SFP', 'SHIB', 'SKL', 'SOL', 'SPELL', 'STRK', 'STX', 'SUI', 'SUSHI', 'SYS', 'TFUEL', 'THETA', 'TKO', 'TLM', 'TRUMP', 'TRX', 'TURBO', 'UNI', 'VOXEL', 'VTHO', 'W', 'WAXP', 'WEN', 'WIN','WLD', 'WOO', 'XAI', 'XEC', 'XVG', 'XRP', 'XVS', 'YGG',  'ZBCN', 'ZIL'];
+    let COIN_LIST = ['1INCH', 'A', 'A2Z', 'AB', 'ACH', 'ACT', 'AEVO', 'AGI', 'AI', 'ALGO', 'ALT', 'ANIME', 'APE', 'APT', 'ARPA', 'ATA', 'AWE', 'AXS', 'BABYDOGE', 'BAN', 'BEL', 'BLUR', 'BOME', 'BONK', 'C98', 'CAKE', 'CAT', 'CELR', 'CFX', 'CHR', 'CHZ', 'CKB', 'COS', 'COTI', 'CRO', 'CSPR', 'CTSI', 'CVC', 'DEGO', 'DENT', 'DGB', 'DODO', 'DOGE', 'DOGE/BTC', 'DOGS', 'DOT', 'DUSK', 'EDU', 'ENA', 'ENJ', 'ENS', 'ETH/BTC', 'FET', 'FLM', 'FLOKI', 'FLR', 'FORM', 'FTT', 'FUN', 'GALA', 'GMT', 'GOAT', 'GRT', 'GT', 'HBAR', 'HFT', 'HIGH', 'HIVE', 'HMSTR', 'HOOK', 'HTX', 'ICP', 'ID', 'IDEX', 'IMX', 'IO', 'IOST', 'IOTA', 'IQ', 'JASMY', 'JOE', 'KAVA', 'KDA', 'KNC', 'LAT', 'LINK', 'LRC', 'LTC', 'LUNC', 'MANA', 'MANTA', 'MAV', 'MBOX', 'MEME', 'MOG', 'NEAR', 'NEIRO', 'NFT', 'NKN', 'NOT', 'OM', 'ONE', 'OXT', 'PENGU', 'PEOPLE', 'PEPE', 'PHA', 'PI', 'PIXEL', 'PNUT', 'POL', 'POND', 'PORTAL', 'PSG', 'PYTH', 'QKC', 'RAD', 'RARE', 'RATS', 'RDNT', 'RSR', 'RUNE', 'SAND', 'SATS', 'SEI', 'SFP', 'SHIB', 'SKL', 'SOL', 'SPELL', 'STRK', 'STX', 'SUI', 'SUSHI', 'SYS', 'TFUEL', 'THETA', 'TKO', 'TLM', 'TRUMP', 'TRX', 'TURBO', 'UNI', 'VOXEL', 'VTHO', 'W', 'WAXP', 'WEN', 'WIN','WLD', 'WOO', 'XAI', 'XEC', 'XVG', 'XRP/BTC', 'XVS', 'YGG',  'ZBCN', 'ZIL'];
     let marketData = {};
     let currentSort = 'updateTime';
     let sortDirection = 'desc';
@@ -888,7 +895,7 @@
     let editingCoin = null;
     let selectedCoin = null;
     let userSettings = JSON.parse(localStorage.getItem('coinSettingsV3')) || {};
-    const REMOVED_COINS = ['GEAR'];   // 已刪除的幣種（本機與雲端都不再載入）
+    const REMOVED_COINS = ['GEAR', 'XRP', 'ETH'];   // 已刪除的幣種（本機與雲端都不再載入）
     REMOVED_COINS.forEach(c => { delete userSettings[c]; delete userSettings[c.toLowerCase()]; });
 
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -927,9 +934,50 @@
             if (userSettings[coin].manualStatus === undefined) userSettings[coin].manualStatus = null;
         }
     });
+
+    // ===================== 備註標籤 =====================
+    // 標籤庫存在本機；備註本身仍是一般文字（可自由輸入），標籤只是點選就能插入的「字符」
+    const NOTE_DELIM = /[\s,，、;；]+/;
+    let noteTags = (() => { try { const t = JSON.parse(localStorage.getItem('noteTagsV1')); if (Array.isArray(t)) return t; } catch (e) {} return ['17', '12', '現']; })();
+    let noteTagManage = false;
+    function saveNoteTags() { localStorage.setItem('noteTagsV1', JSON.stringify(noteTags)); }
+    function escH(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function noteTokens(n) { return String(n || '').split(NOTE_DELIM).filter(Boolean); }
+    function renderNoteTagChips(note) {
+        const on = noteTokens(note);
+        const chips = noteTags.map((t, i) => `<button type="button" class="note-chip${on.includes(t) ? ' on' : ''}" onclick="${noteTagManage ? `removeNoteTag(${i})` : `toggleNoteTag(${i})`}">${escH(t)}${noteTagManage ? ' ✕' : ''}</button>`).join('');
+        return chips + `<button type="button" class="note-chip add" onclick="addNoteTag()">＋ 新增</button>` + `<button type="button" class="note-chip add" onclick="toggleNoteTagManage()">${noteTagManage ? '完成' : '管理'}</button>`;
+    }
+    function refreshNoteChips() { const i = document.getElementById('edit-note'), r = document.getElementById('note-tag-row'); if (i && r) r.innerHTML = renderNoteTagChips(i.value); }
+    function toggleNoteTag(idx) {
+        const inp = document.getElementById('edit-note'); if (!inp) return;
+        const t = noteTags[idx]; let v = inp.value;
+        if (noteTokens(v).includes(t)) {
+            v = v.replace(new RegExp('(^|[\\s,，、;；])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=$|[\\s,，、;；])'), '').replace(/^[\s,，、;；]+/, '');
+        } else {
+            v = v.trim() ? v.replace(/[\s,，、;；]+$/, '') + '、' + t : t;
+        }
+        inp.value = v; refreshNoteChips();
+    }
+    function addNoteTag() {
+        const t = (prompt('新增備註標籤（例如 17、現、突破）') || '').trim().replace(NOTE_DELIM, '');
+        if (!t) return;
+        if (!noteTags.includes(t)) { noteTags.push(t); saveNoteTags(); }
+        toggleNoteTag(noteTags.indexOf(t));
+    }
+    function removeNoteTag(idx) { noteTags.splice(idx, 1); saveNoteTags(); refreshNoteChips(); }
+    function toggleNoteTagManage() { noteTagManage = !noteTagManage; refreshNoteChips(); }
+    function renderNoteHtml(note) {
+        const parts = noteTokens(note).map(t => noteTags.includes(t)
+            ? `<span class="note-pill" onclick="event.stopPropagation();setSearchText('${escH(t).replace(/'/g, '')}')">${escH(t)}</span>`
+            : `<span class="text-[10px] text-amber-400 font-medium italic break-words whitespace-normal">${escH(t)}</span>`);
+        return `<div class="flex flex-wrap items-center gap-1">${parts.join('')}</div>`;
+    }
+    function setSearchText(t) { ['searchInput', 'desktopSearchInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = t; }); renderCards(); }
+
     function saveSettings() { localStorage.setItem('coinSettingsV3', JSON.stringify(userSettings)) }
 
-    function formatPrice(p) { const n = Number(p); if (n === 0) return '---'; if (n < 0.0001) return n.toLocaleString('en-US', { maximumSignificantDigits: 4 }); if (n < 1) return n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
+    function formatPrice(p) { const n = Number(p); if (n === 0) return '---'; if (n < 0.1) return n.toLocaleString('en-US', { maximumSignificantDigits: 4 }); if (n < 1) return n.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
     function formatRelativeTime(ts) { if (!ts) return '未曾設定'; const diff = Date.now() - ts; if (diff < 60000) return '剛剛'; const m = Math.floor(diff / 60000); if (m < 60) return `${m} 分鐘前`; const h = Math.floor(m / 60); if (h < 24) return `${h} 小時前`; const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}` }
     function showToast(msg, type = 'success') { const t = document.createElement('div'); t.className = `fixed bottom-28 left-1/2 -translate-x-1/2 text-xs px-4 py-2 rounded-lg shadow-lg z-[60] transition-all ${type === 'success' ? 'bg-green-600/90 text-white' : 'bg-red-600/90 text-white'}`; t.innerText = msg; t.setAttribute('role','status'); document.body.appendChild(t); setTimeout(() => t.remove(), 3000) }
 
@@ -1093,6 +1141,9 @@
     const COINGECKO_API_KEY = 'CG-6GuPmwJhFp7UjmzTXYw23g7T';
     // 金鑰類型：'demo'（免費 Demo 金鑰） 或 'pro'（付費方案金鑰）
     const COINGECKO_PLAN = 'demo';
+    // 👇 備用金鑰（選填）：主金鑰額度用完、金鑰錯誤或連線失敗時自動改用；留空 = 不啟用
+    const COINGECKO_API_KEY_BACKUP = '';
+    const COINGECKO_PLAN_BACKUP = 'demo';
     // =============================================================
 
     const COINGECKO_BASE = COINGECKO_PLAN === 'pro' ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
@@ -1102,6 +1153,9 @@
     let lastFetchAt = 0;
     let isFetchingMarket = false;
     let missingKeyToastShown = false;
+    let cgBackupUntil = 0;      // 主金鑰失敗後，這個時間點前優先用備用金鑰（10 分鐘）
+    let cgUsingBackup = false;
+    let binanceToastShown = false;
 
     async function fetchWithTimeout(url, timeoutMs = 15000) {
         const controller = new AbortController();
@@ -1166,73 +1220,83 @@
     // ===================== Binance 報價設定 =====================
     // 來源：https://api.binance.com/api/v3/ticker/price（只有現價，沒有 24h 漲跌與成交量）
     const BINANCE_PRICE_URL = 'https://api.binance.com/api/v3/ticker/price';
-    // 只有 /BTC 交易對的幣：用「幣/BTC × BTC/USDT」換算成美元
-    const BINANCE_BTC_PAIRS = { 'DOGE': 'DOGEBTC', 'XRP': 'XRPBTC', 'ETH': 'ETHBTC' };
+    // 幣/BTC 交易對：直接用 ticker/price?symbol=XXXBTC 的原始價格，以 BTC 為單位顯示（不換算美元、不走 CoinGecko）
+    const BINANCE_BTC_PAIRS = { 'DOGE/BTC': 'DOGEBTC', 'XRP/BTC': 'XRPBTC', 'ETH/BTC': 'ETHBTC' };
     // 一律使用幣安 /USDT 報價（不走 CoinGecko）
     const BINANCE_ONLY = ['AI'];
     // CoinGecko 查不到報價時，改用幣安 /USDT 備援
     const BINANCE_FALLBACK = ['FET', 'PHA', 'IO', 'NEIRO', 'AWE', 'CAT', 'IDEX', 'ATA'];
 
-    // 取得指定幣種的幣安美元報價，回傳 { 幣種代號: {price, change, vol, src} }；失敗時丟出錯誤
+    // 取得指定幣種的幣安報價（/USDT 為美元、/BTC 為 BTC 單位），回傳 { 幣種代號: {price, change, vol, src} }
+    // 每個交易對各打一次 ticker/price?symbol=XXX（例如 ?symbol=DOGEBTC），互不影響；查不到的交易對直接略過
+    async function fetchBinanceOne(pair) {
+        const res = await fetchWithTimeout(`${BINANCE_PRICE_URL}?symbol=${pair}`, 10000);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+        const n = Number(d && d.price);
+        if (!(n > 0)) throw new Error('無價格');
+        return n;
+    }
     async function fetchBinancePrices(symbols) {
-        const pairOf = {};   // 幣安交易對 → 幣種代號
-        const needBtc = symbols.some(s => BINANCE_BTC_PAIRS[s]);
-        symbols.forEach(s => { pairOf[BINANCE_BTC_PAIRS[s] || (s + 'USDT')] = s; });
-        const wanted = Object.keys(pairOf);
-        if (needBtc) wanted.push('BTCUSDT');
-        let res;
-        try {
-            res = await fetchWithTimeout(`${BINANCE_PRICE_URL}?symbols=${encodeURIComponent(JSON.stringify(wanted))}`, 15000);
-        } catch (e) { throw new Error('Binance ' + (e.name === 'AbortError' ? '請求逾時' : '網路錯誤')); }
-        // 其中一個交易對不存在時幣安會整批回 400；改為抓全部再自行篩選
-        if (!res.ok) {
-            try { res = await fetchWithTimeout(BINANCE_PRICE_URL, 20000); } catch (e) { throw new Error('Binance 網路錯誤'); }
-            if (!res.ok) throw new Error('Binance HTTP ' + res.status);
-        }
-        const list = await res.json();
-        if (!Array.isArray(list)) throw new Error('Binance 回傳格式異常');
-        const px = {};
-        list.forEach(t => { px[t.symbol] = Number(t.price); });
-        const btcUsd = px['BTCUSDT'];
+        const pairOf = {};   // 幣種代號 → 幣安交易對
+        symbols.forEach(s => { pairOf[s] = BINANCE_BTC_PAIRS[s] || (s + 'USDT'); });
+        const entries = await Promise.all(symbols.map(sym =>
+            fetchBinanceOne(pairOf[sym]).then(v => [sym, v]).catch(e => { console.warn('[Binance 無資料]', sym, '→', pairOf[sym], e.message); return [sym, 0]; })
+        ));
         const out = {};
-        Object.keys(pairOf).forEach(pair => {
-            const sym = pairOf[pair];
-            let usd = px[pair];
-            if (BINANCE_BTC_PAIRS[sym]) usd = (usd > 0 && btcUsd > 0) ? usd * btcUsd : NaN;
-            if (!(usd > 0)) { console.warn('[Binance 無資料]', sym, '→', pair); return; }
-            out[sym] = { price: usd, change: 0, vol: 0, src: 'Binance' };
+        let anyOk = false;
+        entries.forEach(([sym, v]) => {
+            if (v > 0) { anyOk = true; out[sym] = { price: v, change: 0, vol: 0, src: 'Binance', quote: BINANCE_BTC_PAIRS[sym] ? 'BTC' : 'USDT' }; }
         });
+        if (!anyOk) throw new Error('Binance 全部請求失敗');
         return out;
     }
 
+    // 主／備用金鑰：依序嘗試，前一把失敗（額度、金鑰錯誤、被擋）就換下一把
+    function cgKeyList() {
+        const list = [
+            { key: COINGECKO_API_KEY, plan: COINGECKO_PLAN, name: '主' },
+            { key: COINGECKO_API_KEY_BACKUP, plan: COINGECKO_PLAN_BACKUP, name: '備用' }
+        ].filter(k => k.key);
+        return Date.now() < cgBackupUntil ? list.reverse() : list;
+    }
+
+    async function cgRequest(idsStr) {
+        const keys = cgKeyList();
+        let lastErr;
+        for (const k of keys) {
+            const pro = k.plan === 'pro';
+            const qs = new URLSearchParams({ ids: idsStr, vs_currencies: 'usd', include_24hr_change: 'true', include_24hr_vol: 'true', precision: 'full' });
+            qs.set(pro ? 'x_cg_pro_api_key' : 'x_cg_demo_api_key', k.key);
+            try {
+                let res;
+                try { res = await fetchWithTimeout(`https://${pro ? 'pro-api' : 'api'}.coingecko.com/api/v3/simple/price?${qs.toString()}`, 20000); }
+                catch (e) { const err = new Error(e.name === 'AbortError' ? '請求逾時' : '網路錯誤或被瀏覽器 CORS 擋下（常見於 429 限流或網路封鎖）'); err.network = true; throw err; }
+                if (!res.ok) {
+                    let body = ''; try { body = (await res.text()).slice(0, 200); } catch (e) {}
+                    const err = new Error('HTTP ' + res.status + (body ? ' ' + body : '')); err.status = res.status; throw err;
+                }
+                const data = await res.json();
+                if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('回傳格式異常：' + JSON.stringify(data).slice(0, 200));
+                if (data.status && data.status.error_message) throw new Error(data.status.error_message);
+                cgUsingBackup = k.name === '備用';
+                return data;
+            } catch (e) {
+                lastErr = e;
+                console.warn(`[CoinGecko ${k.name}金鑰失敗]`, e.message);
+                if (k.name === '主' && COINGECKO_API_KEY_BACKUP) cgBackupUntil = Date.now() + 600000;
+                else if (k.name === '備用') cgBackupUntil = 0;
+            }
+        }
+        if (keys.length > 1) lastErr.message = '主／備用金鑰皆失敗：' + lastErr.message;
+        throw lastErr;
+    }
+
     // 送出單一批次（/simple/price + ids），回傳 { 幣種代號: {price, change, vol, src} }；失敗時丟出錯誤
-    async function fetchCoinGeckoBatch(symbols) {
+    async function fetchCoinGeckoBatch(symbols, extraIds = []) {
         const idToSym = {};
         symbols.forEach(sym => { idToSym[COIN_ID_MAP[sym]] = sym; });
-        const qs = new URLSearchParams({
-            ids: Object.keys(idToSym).join(','),
-            vs_currencies: 'usd',
-            include_24hr_change: 'true',
-            include_24hr_vol: 'true',
-            precision: 'full'
-        });
-        qs.set(COINGECKO_KEY_PARAM, COINGECKO_API_KEY);
-        let res;
-        try {
-            res = await fetchWithTimeout(`${COINGECKO_BASE}/simple/price?${qs.toString()}`, 20000);
-        } catch (e) {
-            const err = new Error(e.name === 'AbortError' ? '請求逾時' : '網路錯誤或被瀏覽器 CORS 擋下（常見於 429 限流或網路封鎖）');
-            err.network = true; throw err;
-        }
-        if (!res.ok) {
-            let body = '';
-            try { body = (await res.text()).slice(0, 200); } catch (e) {}
-            const err = new Error('HTTP ' + res.status + (body ? ' ' + body : '')); err.status = res.status; throw err;
-        }
-        const data = await res.json();
-        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('回傳格式異常：' + JSON.stringify(data).slice(0, 200));
-        if (data.status && data.status.error_message) throw new Error(data.status.error_message);
-
+        const data = await cgRequest(Object.keys(idToSym).concat(extraIds).join(','));
         const out = {};
         Object.keys(idToSym).forEach(id => {
             const t = data[id];
@@ -1251,7 +1315,7 @@
         const statusEl = document.getElementById('status-indicator');
         const setStatus = (txt, color) => { if (statusEl) statusEl.innerHTML = `<span style="font-size:10px;color:var(--${color});font-family:var(--font-mono)">${txt}</span>`; };
 
-        if (!COINGECKO_API_KEY) {
+        if (!COINGECKO_API_KEY && !COINGECKO_API_KEY_BACKUP) {
             console.warn('尚未填入 CoinGecko API 金鑰（index.html 內的 COINGECKO_API_KEY）');
             setStatus('NO KEY', 'amber');
             if (!missingKeyToastShown) { missingKeyToastShown = true; showToast('請先在 index.html 填入 CoinGecko 金鑰', 'error'); }
@@ -1265,7 +1329,7 @@
 
         try {
             const binanceDirect = COIN_LIST.filter(c => BINANCE_ONLY.includes(c) || BINANCE_BTC_PAIRS[c]);
-            const mappedCoins = COIN_LIST.filter(c => COIN_ID_MAP[c] && !binanceDirect.includes(c));
+            const mappedCoins = COIN_LIST.filter(c => COIN_ID_MAP[c] && !BINANCE_BTC_PAIRS[c]);   // /BTC 交易對只走幣安（單位不同，不能混用 CoinGecko 美元價）
             const unmapped = COIN_LIST.filter(c => !COIN_ID_MAP[c] && !binanceDirect.includes(c));
             if (unmapped.length) console.warn('[缺少 CoinGecko ID 對照]', unmapped.join(', '));
             const batches = splitIntoBatches(mappedCoins);
@@ -1274,14 +1338,14 @@
                 new Promise(r => setTimeout(r, i * 1000)).then(() => fetchCoinGeckoBatch(b))
             ));
 
-            // 幣安：專用幣（DOGE/XRP/ETH/AI）＋ CoinGecko 沒報價的備援幣
+            // 幣安：專用幣（DOGE/BTC、XRP/BTC、ETH/BTC；AI 為 /USDT）＋ CoinGecko 沒報價的備援幣
             const cgMerged = {};
             results.forEach(r => { if (r.status === 'fulfilled') Object.assign(cgMerged, r.value); });
             const binanceList = binanceDirect.concat(BINANCE_FALLBACK.filter(c => COIN_LIST.includes(c) && !cgMerged[c]));
             let binanceOk = false;
             if (binanceList.length) {
                 try { Object.assign(cgMerged, await fetchBinancePrices(binanceList)); binanceOk = true; }
-                catch (e) { console.warn('[Binance 失敗]', e.message); if (statusEl) statusEl.title = e.message; }
+                catch (e) { console.warn('[Binance 失敗]', e.message); if (!binanceToastShown) { binanceToastShown = true; showToast('Binance 報價失敗（BTC 交易對／AI）', 'error'); } }
             }
 
             const merged = {};
@@ -1313,6 +1377,7 @@
                     else marketData[coin] = { price: 0, change: 0, vol: 0, src: '--' };
                 });
                 lastFetchAt = Date.now();
+                if (statusEl) statusEl.title = cgUsingBackup ? '目前使用備用金鑰' : '';
                 if (statusEl) statusEl.innerHTML = `<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>`;
             }
             if (!editingCoin) renderCards();
@@ -1457,7 +1522,7 @@
         if (!isEdit) {
             c.innerHTML = `
         <div class="flex justify-between items-start mb-5">
-            <div><h3 class="text-lg font-bold text-white flex items-center gap-2">${coin}<span class="text-[#8A8176] font-normal text-sm">/USDT</span><span class="text-[9px] px-1.5 py-0.5 bg-white/[0.05] text-[#B3AA9E] rounded border border-white/[0.1] font-normal tracking-wide">${m.src}</span></h3>
+            <div><h3 class="text-lg font-bold text-white flex items-center gap-2">${coin.split('/')[0]}<span class="text-[#8A8176] font-normal text-sm">/${coin.split('/')[1] || 'USDT'}</span><span class="text-[9px] px-1.5 py-0.5 bg-white/[0.05] text-[#B3AA9E] rounded border border-white/[0.1] font-normal tracking-wide">${m.src}</span></h3>
             <p class="text-sm font-mono mt-1 ${chgColor}">${formatPrice(m.price)} <span class="text-xs ml-1">${isUp ? '+' : ''}${Number(m.change).toFixed(2)}%</span></p></div>
             <span class="text-[11px] px-2.5 py-1 rounded-full font-medium border ${statusClass}">${statusLabel}</span>
         </div>
@@ -1474,7 +1539,7 @@
             editingCoin = coin;
             const dropdownValue = s.manualStatus ? s.manualStatus : (s.isHolding ? 'true' : 'false');
             c.innerHTML = `
-        <div class="flex items-center gap-2 mb-4"><h3 class="text-base font-bold text-white">${coin}/USDT <span class="text-xs text-[#8A8176] font-normal">— 編輯模式</span></h3><span class="text-[9px] px-1.5 py-0.5 bg-white/[0.05] text-[#B3AA9E] rounded border border-white/[0.1] font-normal">${m.src}</span></div>
+        <div class="flex items-center gap-2 mb-4"><h3 class="text-base font-bold text-white">${coin.includes('/') ? coin : coin + '/USDT'} <span class="text-xs text-[#8A8176] font-normal">— 編輯模式</span></h3><span class="text-[9px] px-1.5 py-0.5 bg-white/[0.05] text-[#B3AA9E] rounded border border-white/[0.1] font-normal">${m.src}</span></div>
         <div class="space-y-3">
             <div><label class="text-[10px] text-[#8A8176] uppercase block mb-1 font-semibold tracking-wide">交易狀態</label>
             <select id="edit-holding" class="w-full text-xs p-2.5 rounded-lg">
@@ -1491,7 +1556,8 @@
             <div><label class="text-[10px] text-red-500/60 uppercase block mb-1 font-semibold">停損價</label>
             <input type="number" id="edit-sl" value="${s.stopLoss || ''}" placeholder="0" onfocus="if(parseFloat(this.value)===0)this.value=''" class="w-full text-xs p-2.5 rounded-lg"></div>
             <div><label class="text-[10px] text-[#8A8176] uppercase block mb-1 font-semibold">備註</label>
-            <input type="text" id="edit-note" value="${s.note || ''}" placeholder="可選填..." class="w-full text-xs p-2.5 rounded-lg"></div>
+            <input type="text" id="edit-note" value="${escH(s.note || '')}" placeholder="可直接輸入，或點下方標籤..." oninput="refreshNoteChips()" class="w-full text-xs p-2.5 rounded-lg">
+            <div id="note-tag-row" class="flex flex-wrap gap-1.5 mt-2">${renderNoteTagChips(s.note)}</div></div>
             <div class="border-t border-white/5 pt-3 mt-1"><p class="text-[10px] text-purple-400/60 uppercase mb-2 font-semibold">💰 資金計算</p>
             <div class="grid grid-cols-2 gap-3">
                 <div><label class="text-[10px] text-[#8A8176] uppercase block mb-1 font-medium">單筆投入金額 (USDT)</label><input type="number" id="edit-capital" value="${s.capital || ''}" placeholder="0" onfocus="if(parseFloat(this.value)===0)this.value=''" class="w-full text-xs p-2.5 rounded-lg"></div>
@@ -1573,7 +1639,7 @@
     function renderCards() {
         const container = document.getElementById('coin-container');
         const searchVal = (document.getElementById('searchInput').value || document.getElementById('desktopSearchInput').value || '').toUpperCase();
-        let list = COIN_LIST.filter(c => c.toUpperCase().includes(searchVal));
+        let list = COIN_LIST.filter(c => c.toUpperCase().includes(searchVal) || (searchVal && noteTokens((userSettings[c] || {}).note).some(t => t.toUpperCase().includes(searchVal))));
         if (currentFilter === 'holding') list = list.filter(c => (userSettings[c] || {}).isHolding);
         if (currentFilter === 'watching') list = list.filter(c => !(userSettings[c] || {}).isHolding);
         if (currentFilter === 'target_reached') list = list.filter(c => { const s = userSettings[c] || {}; const m = marketData[c] || { price: 0 }; return s.manualStatus === 'target_reached' || (s.isHolding && s.target > 0 && Number(m.price) >= Number(s.target)); });
@@ -1713,7 +1779,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-1">
                          <div class="flex items-start gap-2 flex-1 min-w-0">
                              <span class="text-[9px] px-1.5 py-0.5 bg-white/[0.05] text-[#B3AA9E] rounded border border-white/[0.1] font-normal shrink-0 mt-0.5">${m.src}</span>
-                             ${s.note ? `<span class="text-[10px] text-amber-400 font-medium italic break-words whitespace-normal">${s.note}</span>` : '<span class="text-[10px] text-[#8A8176] mt-0.5">無備註</span>'}
+                             ${s.note ? renderNoteHtml(s.note) : '<span class="text-[10px] text-[#8A8176] mt-0.5">無備註</span>'}
                          </div>
                          <div class="flex gap-3">
                             <span class="text-[10px] text-[#8A8176]">目標 <span class="text-[#B3AA9E]">${s.target || '--'}</span></span>
